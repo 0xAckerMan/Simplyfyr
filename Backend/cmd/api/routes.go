@@ -17,6 +17,9 @@ func (app *Application) routes () *chi.Mux{
 
             r.Put("/{id}/completed", app.mark_complete)
             r.Put("/{id}/incomplete", app.mark_uncomplete)
+            
+            r.Post("/", app.create_project)
+            r.Post("/", app.update_project)
         })
     })
     
