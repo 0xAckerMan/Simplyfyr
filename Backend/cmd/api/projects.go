@@ -82,3 +82,19 @@ func (app *Application) mark_uncomplete(w http.ResponseWriter, r *http.Request){
 func (app *Application) create_project(w http.ResponseWriter, r *http.Request){
     fmt.Fprintln(w, "created a new project")
 }
+
+func (app *Application) update_project (w http.ResponseWriter, r *http.Request){
+    id, err := app.readIDparam(r)
+    if err != nil{
+        http.NotFound(w, r)
+    }
+    fmt.Fprintf(w, "update project of id %d \n", id)
+}
+
+func (app *Application) delete_project (w http.ResponseWriter, r *http.Request){
+    id, err := app.readIDparam(r)
+    if err != nil {
+        http.NotFound(w, r)
+    }
+    fmt.Fprintf(w, "deleted project of id %d \n", id)
+}
