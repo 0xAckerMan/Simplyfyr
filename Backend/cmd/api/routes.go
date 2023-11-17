@@ -7,7 +7,10 @@ import (
 
 func (app *Application) routes () *chi.Mux{
     r := chi.NewRouter()
+    r.NotFound(app.notFoundResponse)
+    r.MethodNotAllowed(app.methodNotAllowedResponse)
     r.Route("/v1", func(r chi.Router) {
+        r.Get("/healthcheck", app.healthcheck)
         r.Route("/projects",func(r chi.Router) {
             r.Get("/", app.all_projects)
             r.Get("/{id}", app.single_project)
@@ -19,7 +22,8 @@ func (app *Application) routes () *chi.Mux{
             r.Put("/{id}/incomplete", app.mark_uncomplete)
             
             r.Post("/", app.create_project)
-            r.Post("/", app.update_project)
+            r.Post("/{id}", app.update_project)
+            r.Delete("/{id}", app.delete_project)
         })
     })
     
