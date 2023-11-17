@@ -10,7 +10,7 @@ func (app *Application) logError (r *http.Request, err error){
 }
 
 func (app *Application) errorResponse (w http.ResponseWriter, r *http.Request, status int, message interface{}){
-    err := app.writeJSON(w,status,message,nil)
+    err := app.writeJSON(w,status,envelope{"error": message},nil)
     if err != nil{
         app.logError(r, err)
         w.WriteHeader(500)
