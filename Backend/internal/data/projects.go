@@ -1,6 +1,12 @@
 package data
 
-import "time"
+import (
+	"database/sql"
+	"errors"
+	"time"
+
+	"github.com/lib/pq"
+)
 
 type Project struct{
     Id int64 `json:"id"`
@@ -13,4 +19,103 @@ type Project struct{
     Created_date time.Time `json:"-"`
     Due_date time.Time `json:"Due_date"`
     Done bool `json:"done"`
+}
+
+type ProjectModel struct{
+    DB *sql.DB
+}
+
+func (p ProjectModel) Insert (project *Project) error {
+    query := `
+        INSERT INTO projects (p_name, p_category,p_excerpt, p_description, p_assigned_to, p_created_by, p_due_date)
+        VALUES ($1, $2, $3, $4,$5, $6, $7)
+        RETURNING p_id, p_created_date, p_done
+    `
+    arg := []interface{}{project.Name, pq.Array(project.Category), project.Excerpt, project.Description, project.Assigned_to, project.Created_by, project.Due_date}
+
+    return p.DB.QueryRow(query, arg...).Scan(&project.Id, &project.Created_date, &project.Done)
+}
+
+func (p ProjectModel) Get(id int64) (*Project,error){
+    if id < 1{
+        return nil, ErrRecordNotFound
+    }
+    query := `
+        SELECT p_id, p_name, p_category, p_excerpt, p_description, p_assigned_to,
+        p_created_by, p_created_date, p_due_date, p_done FROM projects WHERE p_id=$1
+    `
+
+    var project Project
+
+    err := p.DB.QueryRow(query,id).Scan(
+        &project.Id,
+        &project.Name,
+        pq.Array(&project.Category),
+        &project.Excerpt,
+        &project.Description,
+        &project.Assigned_to,
+        &project.Created_by,
+        &project.Created_date,
+        &project.Due_date,
+        &project.Done,
+        )
+
+    if err != nil{
+        switch {
+        case errors.Is(err,sql.ErrNoRows):
+            return nil, ErrRecordNotFound
+        default:
+            return nil, err
+    }
+    }
+    return &project, nil
+}
+
+func (p *ProjectModel) Get_all() ([]*Project, error) {
+    query := `
+        SELECT p_id, p_name, p_category, p_excerpt, p_description, p_assigned_to,
+        p_created_by, p_created_date, p_due_date, p_done FROM projects
+    `
+
+    rows, err := p.DB.Query(query)
+    if err != nil {
+        return nil, err
+    }
+    defer rows.Close()
+
+    var projects []*Project
+    for rows.Next() {
+        var project Project
+        err := rows.Scan(
+            &project.Id,
+            &project.Name,
+            pq.Array(&project.Category),
+            &project.Excerpt,
+            &project.Description,
+            &project.Assigned_to,
+            &project.Created_by,
+            &project.Created_date,
+            &project.Due_date,
+            &project.Done,
+        )
+        if err != nil {
+            return nil, err
+        }
+        projects = append(projects, &project)
+    }
+
+    if err := rows.Err(); err != nil {
+        return nil, err
+    }
+
+    return projects, nil
+}
+
+
+func (p *ProjectModel) Update(project *Project) error {
+    return nil
+}
+
+func (p ProjectModel) Delete (id int64) error {
+    return nil
 }
