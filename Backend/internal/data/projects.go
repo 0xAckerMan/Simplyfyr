@@ -113,7 +113,24 @@ func (p *ProjectModel) Get_all() ([]*Project, error) {
 
 
 func (p *ProjectModel) Update(project *Project) error {
-    return nil
+    query := ` 
+    UPDATE projects
+    SET p_name = $1, p_category = $2,p_excerpt = $3, p_description = $4, p_assigned_to = $5, p_created_by = $6, p_due_date = $7, p_done = $8
+    WHERE p_id = $9
+    RETURNING p_done
+    `
+    args := []interface{}{
+        project.Name,
+        pq.Array(project.Category),
+        project.Excerpt,
+        project.Description,
+        project.Assigned_to,
+        project.Created_by,
+        project.Due_date,
+        project.Done,
+        project.Id,
+    }
+    return p.DB.QueryRow(query,args...).Scan(project.Done)
 }
 
 func (p ProjectModel) Delete (id int64) error {
