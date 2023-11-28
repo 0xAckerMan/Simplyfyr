@@ -128,9 +128,9 @@ func (p *ProjectModel) Update(project *Project) error {
         project.Created_by,
         project.Due_date,
         project.Done,
-        project.Id,
+        &project.Id,
     }
-    return p.DB.QueryRow(query,args...).Scan(project.Done)
+    return p.DB.QueryRow(query,args...).Scan(&project.Done)
 }
 
 func (p ProjectModel) Delete (id int64) error {
