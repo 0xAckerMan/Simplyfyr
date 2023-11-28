@@ -131,7 +131,53 @@ func (app *Application) update_project(w http.ResponseWriter, r *http.Request) {
 		app.notFoundResponse(w, r)
 		return
 	}
-	fmt.Fprintf(w, "update project of id %d \n", id)
+	project, err := app.models.Projects.Get(id)
+	if err != nil {
+		switch {
+		case errors.Is(err, data.ErrRecordNotFound):
+			app.notFoundResponse(w, r)
+		default:
+			app.serverErrorResponse(w, r, err)
+		}
+		return
+	}
+
+	var input struct {
+		Name        string    `json:"name"`
+		Category    []string  `json:"category"`
+		Excerpt     string    `json:"excerpt"`
+		Description string    `json:"description"`
+		Assigned_to int       `json:"assigned_to"`
+		Created_by  int       `json:"created_by"`
+		Due_date    time.Time `json:"due_date"`
+		Done        bool      `json:"done"`
+	}
+
+	err = app.readJSON(w, r, &input)
+	if err != nil {
+		app.badRequestResponse(w, r, err)
+		return
+	}
+
+	project.Name = input.Name
+	project.Category = input.Category
+	project.Excerpt = input.Excerpt
+	project.Description = input.Description
+	project.Assigned_to = input.Assigned_to
+	project.Created_by = input.Created_by
+	project.Due_date = input.Due_date
+	project.Done = input.Done
+
+	err = app.models.Projects.Update(project)
+	if err != nil {
+		app.serverErrorResponse(w, r, err)
+		return
+	}
+
+	err = app.writeJSON(w, http.StatusOK, envelope{"project": project}, nil)
+	if err != nil {
+		app.serverErrorResponse(w, r, err)
+	}
 }
 
 func (app *Application) delete_project(w http.ResponseWriter, r *http.Request) {
@@ -142,3 +188,4 @@ func (app *Application) delete_project(w http.ResponseWriter, r *http.Request) {
 	}
 	fmt.Fprintf(w, "deleted project of id %d \n", id)
 }
+
