@@ -34,6 +34,7 @@ func (app *Application) single_project(w http.ResponseWriter, r *http.Request) {
 		default:
 			app.serverErrorResponse(w, r, err)
 		}
+        return
 	}
 	err = app.writeJSON(w, http.StatusOK, envelope{"project": project}, nil)
 }
@@ -186,6 +187,19 @@ func (app *Application) delete_project(w http.ResponseWriter, r *http.Request) {
 		app.notFoundResponse(w, r)
 		return
 	}
-	fmt.Fprintf(w, "deleted project of id %d \n", id)
-}
+	err = app.models.Projects.Delete(id)
+	if err != nil {
+		switch {
+		case errors.Is(err, data.ErrRecordNotFound):
+			app.notFoundResponse(w, r)
+		default:
+			app.serverErrorResponse(w, r, err)
+		}
+		return
+	}
 
+	err = app.writeJSON(w, http.StatusOK, envelope{"message": "Movie successfully deleted"}, nil)
+	if err != nil {
+		app.serverErrorResponse(w, r, err)
+	}
+}
