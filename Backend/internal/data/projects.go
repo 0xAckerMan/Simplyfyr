@@ -134,5 +134,24 @@ func (p *ProjectModel) Update(project *Project) error {
 }
 
 func (p ProjectModel) Delete (id int64) error {
+    if id < 1 {
+        return ErrRecordNotFound
+    }
+    query := `DELETE FROM projects WHERE p_id = $1`
+
+    result, err := p.DB.Exec(query, id)
+    if err != nil {
+        return err
+    }
+    
+    rowsAffected, err := result.RowsAffected()
+    if err != nil {
+        return err
+    }
+
+    if rowsAffected == 0 {
+        return ErrRecordNotFound
+    }
+
     return nil
 }
