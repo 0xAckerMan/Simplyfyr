@@ -74,7 +74,7 @@ func (p ProjectModel) Get(id int64) (*Project,error){
 func (p *ProjectModel) Get_all() ([]*Project, error) {
     query := `
         SELECT p_id, p_name, p_category, p_excerpt, p_description, p_assigned_to,
-        p_created_by, p_created_date, p_due_date, p_done FROM projects
+        p_created_by, p_created_date, p_due_date, p_done FROM projects ORDER BY p_id
     `
 
     rows, err := p.DB.Query(query)
