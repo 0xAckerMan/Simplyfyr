@@ -34,7 +34,7 @@ func (app *Application) single_project(w http.ResponseWriter, r *http.Request) {
 		default:
 			app.serverErrorResponse(w, r, err)
 		}
-        return
+		return
 	}
 	err = app.writeJSON(w, http.StatusOK, envelope{"project": project}, nil)
 }
@@ -144,14 +144,14 @@ func (app *Application) update_project(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var input struct {
-		Name        string    `json:"name"`
-		Category    []string  `json:"category"`
-		Excerpt     string    `json:"excerpt"`
-		Description string    `json:"description"`
-		Assigned_to int       `json:"assigned_to"`
-		Created_by  int       `json:"created_by"`
-		Due_date    time.Time `json:"due_date"`
-		Done        bool      `json:"done"`
+		Name        *string    `json:"name"`
+		Category    *[]string  `json:"category"`
+		Excerpt     *string    `json:"excerpt"`
+		Description *string    `json:"description"`
+		Assigned_to *int       `json:"assigned_to"`
+		Created_by  *int       `json:"created_by"`
+		Due_date    *time.Time `json:"due_date"`
+		Done        *bool      `json:"done"`
 	}
 
 	err = app.readJSON(w, r, &input)
@@ -160,14 +160,31 @@ func (app *Application) update_project(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	project.Name = input.Name
-	project.Category = input.Category
-	project.Excerpt = input.Excerpt
-	project.Description = input.Description
-	project.Assigned_to = input.Assigned_to
-	project.Created_by = input.Created_by
-	project.Due_date = input.Due_date
-	project.Done = input.Done
+	if input.Name != nil {
+		project.Name = *input.Name
+	}
+	if input.Category != nil {
+		project.Category = *input.Category
+	}
+	if input.Excerpt != nil {
+		project.Excerpt = *input.Excerpt
+	}
+	if input.Description != nil {
+		project.Description = *input.Description
+	}
+    if input.Assigned_to != nil{
+        project.Assigned_to = *input.Assigned_to
+    }
+    if input.Created_by != nil {
+        project.Created_by = *input.Created_by
+    }
+    if input.Due_date != nil {
+        project.Due_date = *input.Due_date
+    }
+    if input.Done != nil {
+        project.Done = *input.Done
+    }
+
 
 	err = app.models.Projects.Update(project)
 	if err != nil {
