@@ -22,7 +22,7 @@ func (app *Application) routes () *chi.Mux{
             r.Put("/{id}/incomplete", app.mark_uncomplete)
             
             r.Post("/", app.create_project)
-            r.Put("/{id}", app.update_project)
+            r.Patch("/{id}", app.update_project)
             r.Delete("/{id}", app.delete_project)
         })
     })
