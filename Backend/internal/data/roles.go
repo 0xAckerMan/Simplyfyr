@@ -86,9 +86,16 @@ func (r *RoleModel) Get_all() ([]*Role, error){
 }
 
 func (r *RoleModel) Update(role *Role) error {
-	return nil
+    query := `UPDATE r_role = $1, r_version = r_version + 1
+    WHERE r_id = $2
+    RETURNING r_version` 
+
+    args := []interface{}{role.Role, role.Id}
+
+    return r.DB.QueryRow(query, args...).Scan(&role.Version)
 }
 
 func (r *RoleModel) Delete(id int64) error {
 	return nil
 }
+
