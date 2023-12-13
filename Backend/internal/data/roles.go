@@ -86,7 +86,8 @@ func (r *RoleModel) Get_all() ([]*Role, error){
 }
 
 func (r *RoleModel) Update(role *Role) error {
-    query := `UPDATE r_role = $1, r_version = r_version + 1
+    query := `UPDATE roles
+    SET r_role = $1, r_version = r_version + 1
     WHERE r_id = $2
     RETURNING r_version` 
 
@@ -96,6 +97,25 @@ func (r *RoleModel) Update(role *Role) error {
 }
 
 func (r *RoleModel) Delete(id int64) error {
+    if id < 1{
+        return ErrRecordNotFound
+    }
+    query := `DELETE FROM roles
+    WHERE r_id = $1`
+
+    result,err := r.DB.Exec(query, id)
+    if err != nil{
+        return err
+    }
+
+    rowsffected, err := result.RowsAffected()
+    if err != nil{
+        return err
+    }
+
+    if rowsffected == 0{
+        return ErrRecordNotFound
+    }
 	return nil
 }
 

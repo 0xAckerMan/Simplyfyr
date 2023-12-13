@@ -29,6 +29,8 @@ func (app *Application) routes () *chi.Mux{
             r.Get("/", app.all_roles)
             r.Post("/", app.create_role)
             r.Get("/{id}", app.single_role)
+            r.Patch("/{id}", app.update_role)
+            r.Delete("/{id}",app.delete_role)
         })
     })
     

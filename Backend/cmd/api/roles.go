@@ -4,7 +4,6 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
-	"time"
 
 	"github.com/0xAckerMan/Simplifyr/Backend/internal/data"
 )
@@ -108,5 +107,30 @@ func (app *Application) update_role(w http.ResponseWriter, r *http.Request) {
     }
 
     app.writeJSON(w,http.StatusOK,envelope{"role":role}, nil)
+
+}
+
+func (app *Application) delete_role(w http.ResponseWriter, r *http.Request){
+    id, err := app.readIDparam(r)
+    if err != nil{
+        app.notFoundResponse(w, r)
+        return
+    }
+    err = app.models.Roles.Delete(id)
+    if err != nil{
+        switch{
+        case errors.Is(err, data.ErrRecordNotFound):
+        app.notFoundResponse(w,r)
+        default:
+        app.serverErrorResponse(w,r,err)
+    }
+        return
+    }
+
+    err = app.writeJSON(w, http.StatusOK,envelope{"message": "Role deleted successfully"}, nil)
+    if err != nil{
+        app.serverErrorResponse(w,r,err)
+        return
+    }
 
 }
