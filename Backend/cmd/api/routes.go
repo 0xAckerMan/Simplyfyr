@@ -32,6 +32,9 @@ func (app *Application) routes () *chi.Mux{
             r.Patch("/{id}", app.update_role)
             r.Delete("/{id}",app.delete_role)
         })
+        r.Route("/users", func(r chi.Router) {
+            r.Post("/", app.registerUserHandler)
+        })
     })
     
     return r
